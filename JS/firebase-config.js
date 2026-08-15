@@ -6,12 +6,13 @@
 // Place your Firebase Web App configuration credentials below.
 // If left as default demo values, LEDGER operates seamlessly in LocalStorage Demo Mode.
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+  apiKey: "AIzaSyBB3rgqcodnRl4uwAnpv5Jm0FjwTV7Y2Kw",
+  authDomain: "ledger-a459c.firebaseapp.com",
+  projectId: "ledger-a459c",
+  storageBucket: "ledger-a459c.firebasestorage.app",
+  messagingSenderId: "652409451480",
+  appId: "1:652409451480:web:e8f54a2c2c7cf2e0b0b8ad",
+  measurementId: "G-0J4WTYLTSL"
 };
 
 let firebaseApp = null;
