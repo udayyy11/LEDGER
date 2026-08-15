@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEDGER — Daily Ops & Year Dashboard</title>
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/stly.css">
+  <link rel="stylesheet" href="css/responsive.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase v10 Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Top Sticky Bar -->
+  <header class="topbar">
+    <div class="topbar-header-row">
+      <a href="index.html" class="brand">
+        <div class="mark">L</div>
+        <div>
+          <h1>LEDGER</h1>
+          <span>daily ops · year score engine</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="topbar-actions">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Today</button>
+        <button class="tab-btn" data-tab="dashboard" onclick="switchTab('dashboard')">Year Dashboard</button>
+      </div>
+
+      <!-- Date Navigator -->
+      <div class="datenav">
+        <button onclick="changeDate(-1)">‹</button>
+        <span class="datelabel mono" id="dateLabel" onclick="jumpToday()"></span>
+        <button onclick="changeDate(1)">›</button>
+        <span class="today-pill" onclick="jumpToday()">TODAY</span>
+      </div>
+
+      <!-- Score Stamp Badge -->
+      <div class="score-stamp">
+        <div class="stamp-ring">
+          <svg width="38" height="38" viewBox="0 0 38 38">
+            <circle cx="19" cy="19" r="15" fill="none" stroke="#232c34" stroke-width="4"/>
+            <circle id="stampArc" cx="19" cy="19" r="15" fill="none" stroke="#e8a94a" stroke-width="4"
+              stroke-linecap="round" stroke-dasharray="94.2" stroke-dashoffset="94.2"/>
+          </svg>
+          <div class="val mono" id="stampVal">0</div>
+        </div>
+        <div class="stamp-label">
+          <span>DAY SCORE</span>
+          <b id="stampBig">0/100</b>
+        </div>
+      </div>
+
+      <!-- User Auth / Cloud Sync Badge -->
+      <a href="login.html" class="user-badge" id="userBadge" style="text-decoration:none;">
+        <span class="status-dot local" id="userStatusDot"></span>
+        <span id="userBadgeText">Local Demo</span>
+      </a>
+
+      <!-- Calendar Button -->
+      <button class="icon-btn" onclick="CalendarModule.open()" title="Open Interactive Calendar">📅</button>
+
+      <!-- Notifications Toggle Button -->
+      <button class="icon-btn" onclick="NotificationsModule.requestPermission()" id="notifBtn" title="Notification Reminders">🔔</button>
+
+      <!-- Theme Toggle -->
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode">🌙</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===================== TODAY VIEW ===================== -->
+    <div id="today" class="grid-today">
+
+      <!-- Top Priorities -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Top Priorities</h3>
+          <span class="wt">wt 20</span>
+        </div>
+        <div id="priorityItems"></div>
+      </div>
+
+      <!-- Health & Fitness (Habits) -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Health &amp; Fitness</h3>
+          <span class="wt">wt 20</span>
+        </div>
+        <div id="habitItems"></div>
+        <div class="add-row">
+          <input id="habitInput" placeholder="Add a habit (e.g. Workout)" onkeydown="if(event.key==='Enter')addHabit()">
+          <button class="add-btn" onclick="addHabit()">+</button>
+        </div>
+      </div>
+
+      <!-- Personal To-Do -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Personal To-Do</h3>
+          <span class="wt">wt 8</span>
+        </div>
+        <div id="personalTodoItems"></div>
+        <div class="add-row">
+          <input id="personalTodoInput" placeholder="Add a task" onkeydown="if(event.key==='Enter')addItem('personalTodo')">
+          <button class="add-btn" onclick="addItem('personalTodo')">+</button>
+        </div>
+      </div>
+
+      <!-- Calls / Emails -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Calls / Emails</h3>
+          <span class="wt">wt 5</span>
+        </div>
+        <div id="callsItems"></div>
+        <div class="add-row">
+          <input id="callsInput" placeholder="Add a call/email" onkeydown="if(event.key==='Enter')addItem('calls')">
+          <button class="add-btn" onclick="addItem('calls')">+</button>
+        </div>
+      </div>
+
+      <!-- To-Do Lists (span2) -->
+      <div class="card span2">
+        <div class="card-head">
+          <h3>To-Do Lists</h3>
+          <span class="wt">wt 12</span>
+        </div>
+        <div id="todoListsItems"></div>
+        <div class="add-row">
+          <input id="todoListsInput" placeholder="Add a to-do item" onkeydown="if(event.key==='Enter')addItem('todoLists')">
+          <button class="add-btn" onclick="addItem('todoLists')">+</button>
+        </div>
+      </div>
+
+      <!-- Water Intake -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Water Intake</h3>
+          <span class="wt">wt 10</span>
+        </div>
+        <div class="water-row" id="waterRow"></div>
+        <div class="water-label" id="waterLabel">0 / 8 cups</div>
+      </div>
+
+      <!-- Meals -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Meals</h3>
+          <span class="wt">—</span>
+        </div>
+        <div class="meal-row"><label>Breakfast</label><input class="item-text" id="meal-breakfast" oninput="updateMeal('breakfast',this.value)"></div>
+        <div class="meal-row"><label>Lunch</label><input class="item-text" id="meal-lunch" oninput="updateMeal('lunch',this.value)"></div>
+        <div class="meal-row"><label>Dinner</label><input class="item-text" id="meal-dinner" oninput="updateMeal('dinner',this.value)"></div>
+        <div class="meal-row"><label>Snacks</label><input class="item-text" id="meal-snacks" oninput="updateMeal('snacks',this.value)"></div>
+      </div>
+
+      <!-- Daily Schedule (span2) -->
+      <div class="card span2">
+        <div class="card-head">
+          <h3>Daily Schedule</h3>
+          <span class="wt">wt 10</span>
+        </div>
+        <div id="scheduleItems"></div>
+        <div class="add-row">
+          <input class="item-time" id="scheduleTimeInput" placeholder="09:00" style="max-width:70px;">
+          <input id="scheduleInput" placeholder="Add a scheduled block" onkeydown="if(event.key==='Enter')addItem('schedule')">
+          <button class="add-btn" onclick="addItem('schedule')">+</button>
+        </div>
+      </div>
+
+      <!-- Appointments -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Appointments</h3>
+          <span class="wt">—</span>
+        </div>
+        <div id="appointmentsItems"></div>
+        <div class="add-row">
+          <input class="item-time" id="apptTimeInput" placeholder="14:00" style="max-width:70px;">
+          <input id="appointmentsInput" placeholder="Add appointment" onkeydown="if(event.key==='Enter')addItem('appointments')">
+          <button class="add-btn" onclick="addItem('appointments')">+</button>
+        </div>
+      </div>
+
+      <!-- Expense Tracker -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Expense Tracker</h3>
+          <span class="wt">—</span>
+        </div>
+        <div class="exp-total mono" id="expTotal">₹0</div>
+        <div class="exp-list" id="expList"></div>
+        <div class="add-row">
+          <input class="field-inline" id="expDesc" placeholder="Item" style="flex:1;">
+          <input class="field-inline" id="expAmt" placeholder="₹" type="number" style="width:65px;">
+          <button class="add-btn" onclick="addExpense()">+</button>
+        </div>
+        <div class="money-reported">
+          <label style="font-size:11px;color:var(--ink-dim);font-family:'IBM Plex Mono';">Money reported</label>
+          <input class="field-inline" id="moneyReported" type="number" oninput="updateMoneyReported(this.value)">
+        </div>
+      </div>
+
+      <!-- Daily Mood -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Daily Mood</h3>
+          <span class="wt">wt 8</span>
+        </div>
+        <div class="mood-row" id="moodRow"></div>
+      </div>
+
+      <!-- Priority Level / Focus Stars -->
+      <div class="card">
+        <div class="card-head">
+          <h3>Priority Level</h3>
+          <span class="wt">wt 7</span>
+        </div>
+        <div class="star-row" id="starRow"></div>
+        <div class="water-label">Overall focus &amp; intensity rating</div>
+      </div>
+
+      <!-- Notes for Tomorrow (span2) -->
+      <div class="card span2">
+        <div class="card-head">
+          <h3>Notes for Tomorrow</h3>
+          <span class="wt">—</span>
+        </div>
+        <textarea class="notes" id="notesTomorrow" oninput="updateNotes(this.value)" placeholder="Anything future-you should know..."></textarea>
+      </div>
+
+    </div>
+
+    <!-- ===================== DASHBOARD VIEW ===================== -->
+    <div id="dashboard">
+      <div class="dash-top">
+        <div class="ring-wrap">
+          <h2>Year Ring
+            <span class="year-switch">
+              <button onclick="changeYear(-1)">‹</button>
+              <span class="mono" id="yearLabel"></span>
+              <button onclick="changeYear(1)">›</button>
+            </span>
+          </h2>
+          <svg id="yearRingSvg" width="360" height="360" viewBox="0 0 360 360"></svg>
+          <div class="ring-tooltip" id="ringTooltip">Hover a day on the ring to inspect score</div>
+        </div>
+
+        <div class="stat-cards">
+          <div class="stat-card amber">
+            <div class="num mono" id="statAvg">0</div>
+            <div class="lbl">Avg score (year)</div>
+          </div>
+          <div class="stat-card teal">
+            <div class="num mono" id="statStreak">0</div>
+            <div class="lbl">Current streak</div>
+          </div>
+          <div class="stat-card violet">
+            <div class="num mono" id="statBest">0</div>
+            <div class="lbl">Best day score</div>
+          </div>
+          <div class="stat-card red">
+            <div class="num mono" id="statLogged">0</div>
+            <div class="lbl">Days logged</div>
+          </div>
+          <div class="stat-card" style="grid-column:span 2;">
+            <div class="num mono" id="statProjected">—</div>
+            <div class="lbl">Projected year-end score</div>
+            <span class="trend-badge flat" id="trendBadge">— trend</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="panel">
+          <h2>Monthly Performance Overview</h2>
+          <div class="chart-container">
+            <canvas id="monthChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Habit Consistency (this year)</h2>
+          <div id="habitBreakdown"></div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h2>Daily Score Performance</h2>
+        <div class="chart-container" style="height: 240px;">
+          <canvas id="dailyChartCanvas"></canvas>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:16px;">
+        <h2>Proactive Insights</h2>
+        <ul class="insight-list" id="insightList"></ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Calendar Modal -->
+  <div class="modal-overlay" id="calendarModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="calTitle" class="mono">Calendar</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="add-btn" id="calPrevMonth">‹</button>
+          <button class="add-btn" id="calNextMonth">›</button>
+          <button class="modal-close" onclick="CalendarModule.close()">✕</button>
+        </div>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"></div>
+
+  <footer>LEDGER — Privacy First. Synchronized securely with Firebase Cloud or kept locally on your device.</footer>
+
+  <!-- Javascript Modules -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/scoring.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

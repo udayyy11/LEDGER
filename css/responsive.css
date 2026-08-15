@@ -1,0 +1,106 @@
+/* Media queries for desktop, tablet, and mobile views */
+
+@media (max-width: 1200px) {
+  .grid-today {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  header.topbar {
+    padding: 10px 16px;
+  }
+  
+  .grid-today {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .card.span2 {
+    grid-column: span 2;
+  }
+
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  header.topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .topbar-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .topbar-actions {
+    justify-content: space-between;
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .datenav {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .datelabel {
+    min-width: 110px;
+    font-size: 11px;
+  }
+
+  main {
+    padding: 12px;
+  }
+
+  .grid-today {
+    grid-template-columns: 1fr;
+  }
+
+  .card.span2 {
+    grid-column: span 1;
+  }
+
+  .ring-wrap {
+    min-width: 100%;
+    padding: 14px;
+  }
+
+  .stat-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card.amber, .stat-card.teal, .stat-card.violet, .stat-card.red {
+    padding: 12px;
+  }
+
+  .stat-card .num {
+    font-size: 24px;
+  }
+
+  .modal-card {
+    padding: 18px;
+    margin: 10px;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand h1 {
+    font-size: 17px;
+  }
+  
+  .stamp-label span {
+    display: none;
+  }
+
+  .tab-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
