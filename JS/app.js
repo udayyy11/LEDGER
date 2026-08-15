@@ -77,7 +77,12 @@ function toggleTheme() {
 
 function initTheme() {
   const saved = localStorage.getItem('ledgerTheme');
-  if (saved === 'light') {
+  if (saved === 'dark') {
+    document.body.classList.remove('light-theme');
+    const toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) toggleBtn.textContent = '🌙';
+  } else {
+    // Default to Light Theme
     document.body.classList.add('light-theme');
     const toggleBtn = document.getElementById('themeToggle');
     if (toggleBtn) toggleBtn.textContent = '☀️';
